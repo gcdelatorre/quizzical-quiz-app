@@ -1,129 +1,163 @@
-import { useState, useEffect, useRef} from "react"
-import { nanoid } from "nanoid"
+import { useState, useEffect, useMemo } from "react";
+import { nanoid } from "nanoid";
+import he from "he"
+
+export default function App() {
+  const [categories, setCategories] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [gameStarting, setGameStarting] = useState(false);
+  const [select, setSelect] = useState();
+  const [score, setScore] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [showScore, setShowScore] = useState(false)
 
 
-export default function App () {
-  const [categories, setCategories] = useState([])
-  const [questions, setQuestions] = useState([])
-  const [gameStarting, setGameStarting] = useState(false)
-  const [select, setSelect] = useState()
-  const [correctCount, setCorrectCount] = useState(0)
+  useEffect(() => {
+    if (!gameStarting) return;
 
-  const hasFetched = useRef(false);
+    let url = "https://opentdb.com/api.php?amount=5";
+    if (select?.category) url += `&category=${select.category}`;
+    if (select?.difficulty) url += `&difficulty=${select.difficulty}`;
+    if (select?.type) url += `&type=${select.type}`;
 
-    useEffect(() => {
-      if (!gameStarting || hasFetched.current) return;
-      hasFetched.current = true;
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        const formatted = data.results.map((q) => ({
+          ...q,
+          id: nanoid(),
+          allAnswers: [...q.incorrect_answers, q.correct_answer].sort(
+            () => Math.random() - 0.5
+          ),
+        }));
+        setQuestions(formatted);
+      })
+      .catch((err) => console.error(err));
+  }, [gameStarting, select]);
 
-      let url = "https://opentdb.com/api.php?amount=5"
-      if (select.category) { url += `&category=${select.category}`}
-      if (select.difficulty) { url += `&difficulty=${select.difficulty}`}
-      if (select.type) { url += `&type=${select.type}`}
+  useEffect(() => {
+    fetch("https://opentdb.com/api_category.php")
+      .then((res) => res.json())
+      .then((data) => setCategories(data.trivia_categories))
+      .catch((err) => console.error(err));
+  }, []);
 
-      fetch(url)
-        .then(res => res.json())
-        .then(data => setQuestions(data.results))
-        .catch(err => console.error(err))
-    }, [gameStarting, select])
+  const categoryElements = useMemo(() => 
+    categories.map((cat) => (
+      <option key={cat.id} value={cat.id}>
+        {cat.name}
+      </option>
+    )), 
+  [categories])
 
-      console.log(questions)
+  function handleSubmit(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const values = Object.fromEntries(formData.entries());
+    const cleanValues = {
+      category: values.category || null,
+      difficulty: values.difficulty || null,
+      type: values.type || null,
+    };
+    setSelect(cleanValues);
+    setGameStarting(true);
+  }
 
-    useEffect(() => {
-      fetch("https://opentdb.com/api_category.php")
-        .then(res => res.json())
-        .then(data => setCategories(data.trivia_categories))
-        .catch(err => console.error(err))
-    }, [])
+  function handleSelectAnswer(index, ans) {
+    setSelectedAnswers((prev) => ({ ...prev, [index]: ans }));
+  }
 
-    const categoryElements = categories.map(cat => {
-      return (
-        <option key={nanoid()} value={cat.id} name={cat.name}>{cat.name}</option>
-      )
-    })
-
-  // Handle form submission
-    function handleSubmit(e) {
-      e.preventDefault() // stop page reload
-
-      const formData = new FormData(e.target)
-      const values = Object.fromEntries(formData.entries())
-
-      // Optional: treat empty strings as null
-      const cleanValues = {
-        category: values.category || null,
-        difficulty: values.difficulty || null,
-        type: values.type || null
+  function handleCheckAnswer() {
+    let newScore = 0;
+    questions.forEach((q, i) => {
+      if (selectedAnswers[i] === q.correct_answer) {
+        newScore++;
       }
+    });
+    setScore(newScore);
+    setShowScore(true)
+  }
 
-      setSelect(cleanValues)
-      setGameStarting(true) // you can use this to trigger question fetching later
-    }
+  const questionAndAnswerElements = questions.map((q, index) => (
+    <div key={q.id} className="question-block">
+      <h3>{he.decode(q.question)}</h3>
+      <ul className="answers-container">
+        {q.allAnswers.map((ans) => (
+          <button
+            key={nanoid()}
+            onClick={() => handleSelectAnswer(index, ans)}
+          >{he.decode(ans)}</button>
+        ))}
+      </ul>
+    </div>
+  ));
 
-    function handleCheckAnswer () {
-      
-    }
+  function handlePlayAgain () {
+    setQuestions([])
+    setGameStarting(false)
+    setScore(0)
+    setShowScore(false)
+    setSelectedAnswers({})
+    setGameStarting(false)
+  }
 
-    const questionAndAnswerElements = questions.map(q => {
-      const allAnswers = [...q.incorrect_answers, q.correct_answer].sort(() => Math.random() - 0.5)
-
-      return (
-        <div key={nanoid()} className="question-block">
-          <h3 dangerouslySetInnerHTML={{ __html: q.question }} />
-          <ul className="answers-container">
-            {allAnswers.map(ans => (
-              <button key={nanoid()} dangerouslySetInnerHTML={{ __html: ans }} />
-            ))}
-          </ul>
-        </div>
-      )
-    })
-    
   return (
     <>
+      {gameStarting && <>
+        <div className="container">{gameStarting && questionAndAnswerElements}</div>
+
+        {showScore &&<p>Score: {score}</p>}
+        {gameStarting && 
+        ( !showScore 
+          ? <button onClick={handleCheckAnswer}>Check Answers</button>
+          : <button onClick={handlePlayAgain}>Play Again</button>
+        )
+          }
+      </>}
+      
+      {!gameStarting &&
+      <>
       <h1>Quizzical</h1>
       <p>Answer the questions and test your knowledge!</p>
-      
+
       <form onSubmit={handleSubmit}>
-          <div className="select-category">
-            <label htmlFor="category"> Category:
-              <select name="category" id="category" defaultValue="Any Category">
-                <option value="">Any Category</option>
-                {categoryElements}
-              </select>
-            </label>
-          </div>
+        <div className="select-category">
+          <label>
+            Category:
+            <select name="category" defaultValue="">
+              <option value="">Any Category</option>
+              {categoryElements}
+            </select>
+          </label>
+        </div>
 
-          <div className="select-difficulty">
-            <label htmlFor="difficulty"> Difficulty:
-              <select name="difficulty" id="difficulty">
-                <option value="" name="difficulty">Any Difficulty</option>
-                <option value="easy" name="difficulty">Easy</option>
-                <option value="medium" name="difficulty">Medium</option>
-                <option value="hard" name="difficulty">Hard</option>
-              </select>
-            </label>
-          </div>
+        <div className="select-difficulty">
+          <label>
+            Difficulty:
+            <select name="difficulty">
+              <option value="">Any Difficulty</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+        </div>
 
-          <div className="select-type">
-            <label htmlFor="type"> Type of questions:
-              <select name="type" id="type">
-                <option value="" name="type">Any Type</option>
-                <option value="multiple" name="type">Multiple Choice</option>
-                <option value="boolean" name="type">True or Flase</option>
-              </select>
-            </label>
-          </div>
+        <div className="select-type">
+          <label>
+            Type of questions:
+            <select name="type">
+              <option value="">Any Type</option>
+              <option value="multiple">Multiple Choice</option>
+              <option value="boolean">True or False</option>
+            </select>
+          </label>
+        </div>
 
-          <button type="submit">Start Quiz</button>
+        <button type="submit">Start Quiz</button>
       </form>
+      </>}
 
-
-
-      <div className="container">
-        {gameStarting && questionAndAnswerElements}
-      </div>
-
-        {gameStarting && <button>Check Answers</button>}
     </>
-  )
+  );
 }
