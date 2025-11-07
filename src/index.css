@@ -1,13 +1,327 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 * {
   padding: 0;
   margin: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
-.answers-container {
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --muted-border: #e6eefb;
+  --accent-light: #eef2ff;
+  --correct: #16a34a;
+  --incorrect: #ef4444;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+}
+
+body {
   display: flex;
-  flex-wrap: wrap;
-  list-style: none;
-  width: 300px;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 600px;
+  width: 90%;
+}
+
+.home-container h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.home-container p {
+  font-size: 1.1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+form {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.select-category,
+.select-difficulty,
+.select-type {
+  /* labels on the left, selects on the right */
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.select-category label,
+.select-difficulty label,
+.select-type label {
+  color: var(--primary-dark);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: left;
+  padding-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+select {
+  /* make selects a fixed, narrower width and visually match the screenshot */
+  width: 350px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--muted-border);
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  box-shadow: 0 6px 14px rgba(16,24,40,0.04);
+}
+
+select:hover {
+  border-color: var(--primary);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.start-btn {
+  margin-top: 1.25rem;
+  padding: 0.75rem 2rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.08s ease;
+  width: 200px;
+}
+
+.start-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+/* Responsive: on small screens stack label above the select */
+@media (max-width: 540px) {
+  .select-category,
+  .select-difficulty,
+  .select-type {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    justify-items: start;
+  }
+
+  .select-category label,
+  .select-difficulty label,
+  .select-type label {
+    text-align: left;
+    width: auto;
+    white-space: normal;
+  }
+
+  select {
+    width: 100%;
+  }
+
+  .start-btn {
+    width: 100%;
+  }
+}
+
+/* Keep existing .question-block styles but update them */
+.question-block {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--muted-border);
+  border-radius: 0.75rem;
+  max-width: 720px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--bg-secondary);
+  box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+}
+
+.question-block h3 {
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.answers-container {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+  margin: 0;
+}
+
 .answers-container button {
-  width: 50%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--muted-border);
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  /* slightly smaller padding and typography for tighter layout */
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  color: var(--text-primary);
+  transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  box-shadow: 0 4px 10px rgba(16,24,40,0.03);
+  text-align: left;
+  min-height: 42px;
+}
+
+.answers-container button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(16,24,40,0.06);
+  border-color: var(--primary);
+}
+
+.answers-container button:active {
+  transform: translateY(0);
+}
+
+.answers-container button.selected {
+  border-color: var(--primary-dark);
+  background: linear-gradient(180deg, var(--accent-light), #eef0ff);
+  box-shadow: 0 8px 20px rgba(79,70,229,0.12);
+}
+
+/* Active visual state: a small lift so selected/active answers feel tactile */
+.answers-container button.active,
+.answers-container button:active {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 34px rgba(79,70,229,0.12);
+  border-color: var(--primary-dark);
+}
+
+/* Optional result coloring (not wired by JS yet) */
+.answers-container button.correct {
+  border-color: var(--correct);
+  background: linear-gradient(180deg,#ecfdf5,#dcfce7);
+}
+
+.answers-container button.incorrect {
+  border-color: var(--incorrect);
+  background: linear-gradient(180deg,#fff1f2,#fee2e2);
+}
+
+.check-btn,
+.play-btn {
+  padding: 0.8rem 1.25rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.08s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+  /* center the button below the questions and match start button width */
+  width: 200px;
+  display: block;
+}
+.check-btn:disabled,
+.check-btn[disabled] {
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.check-btn:hover,
+.play-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79,70,229,0.08);
+}
+
+.check-btn:active,
+.play-btn:active {
+  transform: translateY(0);
+}
+
+.score {
+  font-weight: 700;
+  color: var(--primary-dark);
+  font-size: 1.2rem;
+}
+
+/* subtle global micro-interactions */
+button:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 6px 20px rgba(99,102,241,0.12);
+}
+
+/* Slightly increase heading weight on larger screens */
+@media (min-width: 900px) {
+  .home-container h1 { font-size: 3rem; }
+}
+
+/* Layout for quiz questions on wider screens */
+@media (min-width: 980px) {
+  .container { width: 900px; }
+  .answers-container { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* intermediate breakpoint: 720px show 3 columns */
+@media (min-width: 720px) and (max-width: 979px) {
+  .answers-container { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* result row: score left, button right */
+.result-row {
+  width: 320px;
+  margin: 0 auto 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* make play/check buttons full width on small screens */
+@media (max-width: 540px) {
+  .check-btn, .play-btn { width: 200px; }
+  .result-row { width: 70%; padding: 0 1rem; }
 }
