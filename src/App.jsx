@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { nanoid } from "nanoid";
 import he from "he"
+import bg from "./assets/bg.png"
+import bg2 from "./assets/bg2.png"
 
 export default function App() {
   const [categories, setCategories] = useState([]);
@@ -88,7 +90,7 @@ export default function App() {
           const classes = [];
 
           if (isSelected) {
-            classes.push('selected', 'active');
+            classes.push('selected');
           }
 
           if (showScore) {
@@ -123,6 +125,9 @@ export default function App() {
 
   return (
     <>
+      <img src={bg} alt="background" className="bg-top" />
+      <img src={bg2} alt="background" className="bg-bottom" />
+
       {gameStarting ? (
         <>
           <div className="container">{questionAndAnswerElements}</div>
