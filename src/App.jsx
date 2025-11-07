@@ -82,12 +82,32 @@ export default function App() {
     <div key={q.id} className="question-block">
       <h3>{he.decode(q.question)}</h3>
       <ul className="answers-container">
-        {q.allAnswers.map((ans) => (
-          <button
-            key={nanoid()}
-            onClick={() => handleSelectAnswer(index, ans)}
-          >{he.decode(ans)}</button>
-        ))}
+        {q.allAnswers.map((ans) => {
+          const isSelected = selectedAnswers[index] === ans;
+          const isCorrect = ans === q.correct_answer;
+          const classes = [];
+
+          if (isSelected) {
+            classes.push('selected', 'active');
+          }
+
+          if (showScore) {
+            // show correct / incorrect after checking
+            if (isCorrect) classes.push('correct');
+            else if (isSelected && !isCorrect) classes.push('incorrect');
+          }
+
+          return (
+            <button
+              key={nanoid()}
+              onClick={() => handleSelectAnswer(index, ans)}
+              disabled={showScore}
+              className={classes.join(' ')}
+            >
+              {he.decode(ans)}
+            </button>
+          );
+        })}
       </ul>
     </div>
   ));
@@ -103,61 +123,65 @@ export default function App() {
 
   return (
     <>
-      {gameStarting && <>
-        <div className="container">{gameStarting && questionAndAnswerElements}</div>
+      {gameStarting ? (
+        <>
+          <div className="container">{questionAndAnswerElements}</div>
 
-        {showScore &&<p>Score: {score}</p>}
-        {gameStarting && 
-        ( !showScore 
-          ? <button onClick={handleCheckAnswer}>Check Answers</button>
-          : <button onClick={handlePlayAgain}>Play Again</button>
-        )
-          }
-      </>}
-      
-      {!gameStarting &&
-      <>
-      <h1>Quizzical</h1>
-      <p>Answer the questions and test your knowledge!</p>
+          {showScore ? (
+            <div className="result-row">
+              <p className="score">Score: {score}/5</p>
+              <button className="play-btn" onClick={handlePlayAgain}>
+                Play Again
+              </button>
+            </div>
+          ) : (
+            <button disabled={Object.keys(selectedAnswers).length !== questions.length}
+            className="check-btn" onClick={handleCheckAnswer}>
+              Check Answers
+            </button>
+          )}
+        </>
+      ) : (
+        <div className="home-container">
+          <h1>Quizzical</h1>
+          <p>Answer the questions and test your knowledge!</p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="select-category">
-          <label>
-            Category:
-            <select name="category" defaultValue="">
-              <option value="">Any Category</option>
-              {categoryElements}
-            </select>
-          </label>
+          <form onSubmit={handleSubmit}>
+            <div className="select-category">
+              <label>
+                Category:  </label>
+                <select name="category" defaultValue="">
+                  <option value="">Any Category</option>
+                  {categoryElements}
+                </select>
+             
+            </div>
+
+            <div className="select-difficulty">
+              <label htmlFor="difficulty">Difficulty:</label>
+              <select id="difficulty" name="difficulty">
+                <option value="">Any Difficulty</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+
+            <div className="select-type">
+              <label htmlFor="type">Type of questions:</label>
+              <select id="type" name="type">
+                <option value="">Any Type</option>
+                <option value="multiple">Multiple Choice</option>
+                <option value="boolean">True or False</option>
+              </select>
+            </div>
+
+            <button type="submit" className="start-btn">
+              Start Quiz
+            </button>
+          </form>
         </div>
-
-        <div className="select-difficulty">
-          <label>
-            Difficulty:
-            <select name="difficulty">
-              <option value="">Any Difficulty</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-          </label>
-        </div>
-
-        <div className="select-type">
-          <label>
-            Type of questions:
-            <select name="type">
-              <option value="">Any Type</option>
-              <option value="multiple">Multiple Choice</option>
-              <option value="boolean">True or False</option>
-            </select>
-          </label>
-        </div>
-
-        <button type="submit">Start Quiz</button>
-      </form>
-      </>}
-
+      )}
     </>
   );
 }
