@@ -134,7 +134,7 @@ export default function App() {
 
           {showScore ? (
             <div className="result-row">
-              <p className="score">Score: {score}/5</p>
+              <p className="score">Your scored {score}/5 correct answers</p>
               <button className="play-btn" onClick={handlePlayAgain}>
                 Play Again
               </button>
@@ -149,7 +149,7 @@ export default function App() {
       ) : (
         <div className="home-container">
           <h1>Quizzical</h1>
-          <p>Answer the questions and test your knowledge!</p>
+          <p>Choose a quiz and find out what you really know!</p>
 
           <form onSubmit={handleSubmit}>
             <div className="select-category">
@@ -185,8 +185,11 @@ export default function App() {
               Start Quiz
             </button>
           </form>
+
         </div>
       )}
+        {/* footer moved outside so it is always visible */}
+        <p className="footer">Developed by <a target="blank" href="https://github.com/gcdelatorre">Gian De la Torre</a></p>
     </>
   );
 }
