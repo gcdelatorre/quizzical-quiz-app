@@ -1,4 +1,4 @@
-# 🧠 Quizzical (React + Vite)
+# 🧠 Quizzical
 
 A simple quiz app built with **React**.
 
