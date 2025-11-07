@@ -24,9 +24,9 @@ This is the final Solo Project of _**Bob Ziroll's React Course on Scrimba**_ dev
 
 ## 📸 Preview
 
-![Quiz Preview](src/assets/home-preview.png)
-![Quiz Preview](src/assets/quiz-preview.png)
-![Quiz Preview](src/assets/quiz2-preview.png)
+![Quiz Preview](assets/home-preview.png)
+![Quiz Preview](assets/quiz-preview.png)
+![Quiz Preview](assets/quiz2-preview.png)
 
 ---
 
